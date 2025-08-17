@@ -8,7 +8,7 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :object'))
 
-morgan.token('object', function(req, res) {
+morgan.token('object', function(req, _res) {
     return JSON.stringify(req.body)
 })
 
@@ -20,14 +20,11 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.post('/api/persons', (req, res, next) => {
-    if (!req.body.name || !req.body.number) {
-        return res.status(400).json({error:'name or number missing'})
-    }
     const person = new Person({
         name: req.body.name,
         number: req.body.number
     })
-    
+
     person.save()
         .then(savedPerson => {
             res.status(201).json(savedPerson)
@@ -42,14 +39,14 @@ app.get('/api/persons/:id', (req, res, next) => {
             if (person) {
                 res.json(person)
             } else {
-                res.status(404).send({error: 'id not found'})
+                res.status(404).send({ error: 'id not found' })
             }
         })
         .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndUpdate(req.params.id, {number: req.body.number}, {new: true})
+    Person.findByIdAndUpdate(req.params.id, { number: req.body.number }, { new: true })
         .then(person => {
             if (!person) {
                 return res.status(400).end()
@@ -60,7 +57,7 @@ app.put('/api/persons/:id', (req, res, next) => {
 })
 
 app.get('/info', (req, res) => {
-    Person.find({}).then(persons => 
+    Person.find({}).then(persons =>
         res.send(`<p>Phonebook has info for ${persons.length} people <br/> ${Date()}</p>`)
     )
 })
@@ -68,14 +65,14 @@ app.get('/info', (req, res) => {
 app.delete('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findByIdAndDelete(id)
-        .then(result => {
+        .then(res => {
             res.status(204).end()
         })
         .catch(error => next(error))
 })
 
 const unknownEndpoint = (req, res) => {
-    res.status(404).send({error: 'unknown endpoint'})
+    res.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
@@ -84,14 +81,15 @@ const errorHandler = (error, req, res, next) => {
     console.log(error.message)
 
     if (error.name === 'CastError') {
-        return res.status(400).send({error: 'malformed id'})
+        return res.status(400).send({ error: 'malformed id' })
     }
-    if (error.name === 'Internal Server Error') {
-        return res.status(500).send({error: 'id not found'})
+    else if (error.name === 'Internal Server Error') {
+        return res.status(500).send({ error: 'id not found' })
     }
-    if (error.name === 'ValidationError') {
-        return res.status(400).json({error: error.message})
+    else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
     }
+    next(error)
 }
 
 app.use(errorHandler)
