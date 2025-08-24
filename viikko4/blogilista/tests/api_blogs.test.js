@@ -25,34 +25,35 @@ describe('8 & 9: GET /api/blogs', () => {
     })
 
     test('all blogs are returned', async () => {
-        const response = await api.get('/api/blogs')
-        assert.strictEqual(response.body.length, 6)
+        const result = await api.get('/api/blogs')
+        assert.strictEqual(result.body.length, 6)
     })
 
     test("blog id is called 'id'", async () => {
-        const response = await api.get('/api/blogs')
-        assert.match(response.body[0].id, /^[a-z0-9]{24}$/)
+        const result = await api.get('/api/blogs')
+        assert.match(result.body[0].id, /^[a-z0-9]{24}$/)
     })
 })
 
 describe('10 & 11 & 12: POST /api/blogs',  () => {
-    const newBlog = {title: "New Blog", author: "Someone", url: "www.....", likes: ""} 
     
     test('new blog can be added and found', async () => {
+        const newBlog = {title: "New Blog", author: "Someone", url: "www.....", likes: 2} 
         await api
             .post('/api/blogs')
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
-        const result = await api.get('/api/blogs')
-        assert.strictEqual(result.body.length, 7)
-        assert.deepStrictEqual(result.body[result.body.length-1].title, newBlog.title)
+        const result = await helper.blogsInDB()
+        assert.strictEqual(result.length, 7)
+        assert.deepStrictEqual(result[result.length-1].title, newBlog.title)
     })
 
     test('blog without like amount has 0 likes', async () => {
+        const newBlog = {title: "New Blog", author: "Someone", url: "www.....", likes: ""} 
         await api.post('/api/blogs').send(newBlog)
-        const result = await api.get('/api/blogs')
-        assert.strictEqual(result.body[result.body.length-1].likes, 0)
+        const result = await helper.blogsInDB()
+        assert.strictEqual(result[result.length-1].likes, 0)
     })
     
     test('blog without title get response 400 and blog is not saved', async () => {
@@ -61,8 +62,8 @@ describe('10 & 11 & 12: POST /api/blogs',  () => {
             .post('/api/blogs')
             .send(invalidBlog)
             .expect(400)
-        const result = await api.get('/api/blogs')
-        assert.strictEqual(result.body.length, 6)
+        const result = await helper.blogsInDB()
+        assert.strictEqual(result.length, 6)
     })
 
     test('blog without url get response 400 and blog is not saved', async () => {
@@ -71,8 +72,32 @@ describe('10 & 11 & 12: POST /api/blogs',  () => {
             .post('/api/blogs')
             .send(invalidBlog)
             .expect(400)
-        const result = await api.get('/api/blogs')
-        assert.strictEqual(result.body.length, 6)
+        const result = await helper.blogsInDB()
+        assert.strictEqual(result.length, 6)
+    })
+})
+
+describe('13 & 14: DELETE and PATCH /api/blogs', () => {
+
+    test('blog can be removed', async () => {
+        const blogsAtStart = await helper.blogsInDB()
+        await api.delete(`/api/blogs/${blogsAtStart[0].id}`).expect(204)
+        const blogsAtEnd = await helper.blogsInDB()
+
+        titles = blogsAtEnd.map(blog => blog.title)
+        assert(!titles.includes(blogsAtStart[0].title))
+        assert.strictEqual(blogsAtStart.length, blogsAtEnd.length+1)
+    })
+
+    test('likes can be changed', async () => {
+        const blogsAtStart = await helper.blogsInDB()
+        const blogToBeChanged = blogsAtStart[0]
+        await api
+            .patch(`/api/blogs/${blogToBeChanged.id}`)
+            .send({ likeChange: 1 })
+            .expect(200)
+        const blogsAtEnd = await helper.blogsInDB()
+        assert.strictEqual(blogToBeChanged.likes + 1, blogsAtEnd[0].likes)
     })
 })
 
