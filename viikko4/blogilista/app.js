@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const config = require('./utils/config')
 const blogsRouter = require('./controllers/blogs')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 
 const app = express()
 
@@ -17,6 +18,7 @@ mongoose.connect(config.MONGODB_URI)
 app.use(express.json())
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
@@ -30,7 +32,9 @@ const errorHandler = (error, req, res, next) => {
         return res.status(400).json({ error: error.message })
     } else if (error.name === 'MongooseError') {
         return res.status(400).json({ error: error.message })
-    }
+    }  else if (error.name ===  'JsonWebTokenError') {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
 
   next(error)
 }

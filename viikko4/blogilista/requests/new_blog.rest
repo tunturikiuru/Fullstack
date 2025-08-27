@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlpbmVzIiwiaWQiOiI2OGFmNTE5NTg2MjJkYjY4YjgxMTIzYjUiLCJpYXQiOjE3NTYzMjAxNzJ9.kTTtTLzCqyV_m4UXTw4D22J_lNkK2eb5IHFS1MW9v94
 
 {
-    "title": "3.2 valmis?",
-    "author": "?",
+    "title": "uusi blogi",
+    "author": "iines",
     "url": "www...",
-    "likes": 1
+    "likes": 100
 }
