@@ -16,6 +16,19 @@ mongoose.connect(config.MONGODB_URI)
     })
 
 app.use(express.json())
+
+const tokenExtractor = (req, res, next) => {
+    let authorization = req.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+        authorization = authorization.replace('Bearer ', '')
+        req.token = authorization
+    } else {
+        req.token = null
+    }
+    next()
+}
+
+app.use(tokenExtractor)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
