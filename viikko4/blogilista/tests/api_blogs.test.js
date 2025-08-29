@@ -2,8 +2,10 @@ const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper.js')
 
 const api = supertest(app)
@@ -35,12 +37,26 @@ describe('8 & 9: GET /api/blogs', () => {
     })
 })
 
-describe('10 & 11 & 12: POST /api/blogs',  () => {
+describe('10 & 11 & 12 & 23: POST /api/blogs',  () => {
+    let token
+    let username
+
+    beforeEach(async () => {
+        await User.deleteMany({})
+        const passwordHash = await bcrypt.hash('onnenlantti', 10)
+        username = 'roope'
+        const newUser = new User({ username: username, name: 'R. Ankka', passwordHash })
+        await newUser.save()
+        const user = { username: username, password: 'onnenlantti'}
+        const result = await api.post('/api/login').send(user)
+        token = result.body.token 
+    })
     
     test('new blog can be added and found', async () => {
-        const newBlog = {title: "New Blog", author: "Someone", url: "www.....", likes: 2} 
+        const newBlog = {title: "raha", author: "maailman rikkain ankka", url: "www.....", likes: 2} 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -51,7 +67,10 @@ describe('10 & 11 & 12: POST /api/blogs',  () => {
 
     test('blog without like amount has 0 likes', async () => {
         const newBlog = {title: "New Blog", author: "Someone", url: "www.....", likes: ""} 
-        await api.post('/api/blogs').send(newBlog)
+        await api
+            .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .send(newBlog)
         const result = await helper.blogsInDB()
         assert.strictEqual(result[result.length-1].likes, 0)
     })
@@ -60,6 +79,7 @@ describe('10 & 11 & 12: POST /api/blogs',  () => {
         const invalidBlog = {title: "", author: "Someone", url: "www.....", likes: "1"} 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(invalidBlog)
             .expect(400)
         const result = await helper.blogsInDB()
@@ -70,36 +90,58 @@ describe('10 & 11 & 12: POST /api/blogs',  () => {
         const invalidBlog = {title: "Next Blog", author: "Someone", url: "", likes: "3"} 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(invalidBlog)
             .expect(400)
         const result = await helper.blogsInDB()
         assert.strictEqual(result.length, 6)
     })
-})
 
-describe('13 & 14: DELETE and PATCH /api/blogs', () => {
-
-    test('blog can be removed', async () => {
+    test('blog cannot added without right authorization', async () => {
         const blogsAtStart = await helper.blogsInDB()
-        await api.delete(`/api/blogs/${blogsAtStart[0].id}`).expect(204)
-        const blogsAtEnd = await helper.blogsInDB()
-
-        titles = blogsAtEnd.map(blog => blog.title)
-        assert(!titles.includes(blogsAtStart[0].title))
-        assert.strictEqual(blogsAtStart.length, blogsAtEnd.length+1)
-    })
-
-    test('likes can be changed', async () => {
-        const blogsAtStart = await helper.blogsInDB()
-        const blogToBeChanged = blogsAtStart[0]
+        const newBlog = {title: "raha", author: "maailman rikkain ankka", url: "www.....", likes: 2}
         await api
-            .patch(`/api/blogs/${blogToBeChanged.id}`)
-            .send({ likeChange: 1 })
-            .expect(200)
+            .post('/api/blogs')
+            .set('Authorization', `Bearer qwertyuio`)
+            .send(newBlog)
+            .expect(401)
         const blogsAtEnd = await helper.blogsInDB()
-        assert.strictEqual(blogToBeChanged.likes + 1, blogsAtEnd[0].likes)
+        assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
+    })
+
+
+    describe('13 & 14 & 23: DELETE and PATCH /api/blogs', () => {
+        let blogId
+
+        beforeEach(async () => {
+            const newBlog = {title: "lisää rahaa", author: "maailman rikkain ankka", url: "www.....", likes: 2} 
+            const result = await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(newBlog)
+            blogId = result.body.id
+        })
+
+        test('blog can be removed', async () => {
+            const blogsAtStart = await helper.blogsInDB()
+            await api.delete(`/api/blogs/${blogId}`).set('Authorization', `Bearer ${token}`).expect(204)
+            const blogsAtEnd = await helper.blogsInDB()
+
+            titles = blogsAtEnd.map(blog => blog.title)
+            assert(!titles.includes('lisää rahaa'))
+            assert.strictEqual(blogsAtStart.length, blogsAtEnd.length+1)
+        })
+
+        test('likes can be changed', async () => {
+            const blogsAtStart = await helper.blogsInDB()
+            const blogToBeChanged = blogsAtStart[0]
+            await api
+                .patch(`/api/blogs/${blogToBeChanged.id}`)
+                .send({ likeChange: 1 })
+                .expect(200)
+            const blogsAtEnd = await helper.blogsInDB()
+            assert.strictEqual(blogToBeChanged.likes + 1, blogsAtEnd[0].likes)
+        })
     })
 })
+
 
 after(async () => {
     await mongoose.connection.close()
