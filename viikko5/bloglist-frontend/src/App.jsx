@@ -70,16 +70,22 @@ const NewBlogForm = ({ createNewBlog, title, setTitle, author, setAuthor, url, s
   )
 }
 
-const ErrorMessage = ({ errorMessage }) => {
-  const errorStyle = {
-    color: 'red',
-    fontSize: '30px',
-    border: '3px solid red'
-
+const Message = ({ message, setMessage }) => {
+  if (!message) {
+    return null
   }
+  const messageStyle = {
+    color: message.type === 'error' ? 'red' : 'green',
+    fontSize: '30px',
+    border: message.type === 'error' ? '3px solid red' : '3px solid green'
+  }
+  setTimeout(() => {
+    setMessage(null)
+  }, 5000)
+
   return (
   <div>
-    <p style={errorStyle} >{ errorMessage }</p>
+    <p style={messageStyle} >{ message.text }</p>
   </div>
 )}
 
@@ -89,7 +95,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [message, setMessage] = useState('')
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -114,11 +120,9 @@ const App = () => {
       window.localStorage.setItem('user', JSON.stringify(userLoggingIn))
       setUsername('')
       setPassword('')
+      setMessage({ type: 'notification', text: 'login succesfull' })
     } catch {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setMessage({ type: 'error', text: 'wrong credentials' })
     }
   }
 
@@ -126,6 +130,7 @@ const App = () => {
     window.localStorage.clear()
     setUser(null)
     blogService.setToken(null)
+    setMessage({ type: 'notification', text: 'logout succesfull' })
   }
 
   const createNewBlog = async (event) => {
@@ -138,11 +143,12 @@ const App = () => {
     setTitle('')
     setAuthor('')
     setUrl('')
+    setMessage({ type: 'notification', text: `a new blog ${newBlog.title} by ${newBlog.author} added` })
   }
 
   return (
     <>
-      {errorMessage && <ErrorMessage errorMessage={ errorMessage } />}
+      {message && <Message message={ message } setMessage={setMessage } />}
       {!user && <LoginForm username={username} setUsername={setUsername} password={password} setPassword={setPassword} handleLogin={handleLogin}/>}
       {user && <NewBlogForm createNewBlog={createNewBlog} title={title} setTitle={setTitle} author={author} setAuthor={setAuthor} url={url} setUrl={setUrl}/>}
       {user  && <Blogs blogs={blogs} logout={logout} />}
