@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import BlogForm from "./NewBlogForm"
+import blogService from '../services/blogs'
+
 
 const Blogs = ({blogs, setBlogs, logout, setMessage}) => {
   return (
@@ -11,17 +13,17 @@ const Blogs = ({blogs, setBlogs, logout, setMessage}) => {
       </div>
       <BlogForm blogs={blogs} setBlogs={setBlogs} setMessage={setMessage}/>
       <div>
-        {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
+        {blogs.map(blog => <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} />)}
       </div>
     </div>
 )}
 
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, blogs, setBlogs }) => {
   const [blogVisible, setBlogVisible] = useState(false)
+
   const hideWhenVisible = {display: blogVisible ? 'none' : ''}
   const showWhenVisible = {display: blogVisible ? '': 'none'}
-
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -30,8 +32,15 @@ const Blog = ({ blog }) => {
     marginBottom: 5
   }
 
-  blog.added = blog.user[0] ? blog.user[0].name : 'added by unknown user'
+  const addLike = async () => {
+    const addedBy =  blog.user
+    const result = await blogService.updateLikes({ id: blog.id, title: blog.title, author: blog.author, url: blog.url, likes: blog.likes + 1, user: blog.user[0]?.id })
+    result.user = addedBy
+    const updatedBlogs = blogs.map(item => item.id===blog.id ? result : item)
+    setBlogs(updatedBlogs)
+  }
 
+  /* 'added by unknown user' for few old database entries */ 
   return(
     <div style={blogStyle}>
       <div style={hideWhenVisible}>
@@ -45,10 +54,10 @@ const Blog = ({ blog }) => {
           {blog.url} 
         </div>
         <div>
-          likes: {blog.likes} <button>like - not yet working</button>
+          likes: {blog.likes} <button onClick={() => addLike()}>like</button>
         </div>
         <div>
-          {blog.added} 
+          { blog.user[0]?.name || 'added by unknown user' } 
         </div>
       </div>
     </div>
