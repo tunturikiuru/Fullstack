@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import BlogForm from "./NewBlogForm"
+import BlogForm from './NewBlogForm'
 import blogService from '../services/blogs'
 
 
-const Blogs = ({blogs, setBlogs, logout, setMessage, user}) => {
+const Blogs = ({ blogs, setBlogs, logout, setMessage, user }) => {
   const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
-  
+
   return (
-  <div>
+    <div>
       <h2>blogs</h2>
-      <div> 
+      <div>
         {user.name} logged in
         <button onClick={logout}>logout</button>
       </div>
@@ -18,14 +18,15 @@ const Blogs = ({blogs, setBlogs, logout, setMessage, user}) => {
         {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} blogs={sortedBlogs} setBlogs={setBlogs} user={user} setMessage={setMessage}/>)}
       </div>
     </div>
-)}
+  )
+}
 
 
 const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
   const [blogVisible, setBlogVisible] = useState(false)
 
-  const hideWhenVisible = {display: blogVisible ? 'none' : ''}
-  const showWhenVisible = {display: blogVisible ? '': 'none'}
+  const hideWhenVisible = { display: blogVisible ? 'none' : '' }
+  const showWhenVisible = { display: blogVisible ? '': 'none' }
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -45,33 +46,33 @@ const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
   const removeBlog = async () => {
     if (window.confirm(`Remove ${blog.name} by ${blog.author}`)) {
       try {
-      const result = await blogService.removeBlog({ id: blog.id })
-      const updatedBlogs = blogs.filter(item => item.id !== result.id)
-      setBlogs(updatedBlogs)
+        const result = await blogService.removeBlog({ id: blog.id })
+        const updatedBlogs = blogs.filter(item => item.id !== result.id)
+        setBlogs(updatedBlogs)
       } catch (error) {
         setMessage(error)
       }
     }
   }
 
-  /* 'added by unknown user' for few old database entries */ 
+  /* 'added by unknown user' for few old database entries */
   return(
     <div style={blogStyle}>
       <div style={hideWhenVisible}>
         {blog.title} {blog.author} <button onClick={() => setBlogVisible(true)}>view</button>
-      </div> 
+      </div>
       <div style={showWhenVisible}>
         <div>
           {blog.title} {blog.author} <button onClick={() => setBlogVisible(false)}>hide</button>
         </div>
         <div>
-          {blog.url} 
+          {blog.url}
         </div>
         <div>
           likes: {blog.likes} <button onClick={() => addLike()}>like</button>
         </div>
         <div>
-          { blog.user[0]?.name || 'added by unknown user' } 
+          { blog.user[0]?.name || 'added by unknown user' }
         </div>
         <div>
           { user.username === blog.user[0]?.username && <button onClick={ () => removeBlog() }>remove</button> }

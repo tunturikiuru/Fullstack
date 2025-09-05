@@ -12,9 +12,10 @@ const Message = ({ message, setMessage }) => {
   }, 5000)
 
   return (
-  <div>
-    <p style={messageStyle} >{ message.text }</p>
-  </div>
-)}
+    <div>
+      <p style={messageStyle} >{ message.text }</p>
+    </div>
+  )
+}
 
 export default Message
