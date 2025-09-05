@@ -3,23 +3,25 @@ import BlogForm from "./NewBlogForm"
 import blogService from '../services/blogs'
 
 
-const Blogs = ({blogs, setBlogs, logout, setMessage}) => {
+const Blogs = ({blogs, setBlogs, logout, setMessage, user}) => {
+  const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
+  
   return (
   <div>
       <h2>blogs</h2>
       <div> 
-        {JSON.parse(window.localStorage.getItem('user')).name} logged in
+        {user.name} logged in
         <button onClick={logout}>logout</button>
       </div>
       <BlogForm blogs={blogs} setBlogs={setBlogs} setMessage={setMessage}/>
       <div>
-        {blogs.map(blog => <Blog key={blog.id} blog={blog} blogs={blogs} setBlogs={setBlogs} />)}
+        {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} blogs={sortedBlogs} setBlogs={setBlogs} user={user} setMessage={setMessage}/>)}
       </div>
     </div>
 )}
 
 
-const Blog = ({ blog, blogs, setBlogs }) => {
+const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
   const [blogVisible, setBlogVisible] = useState(false)
 
   const hideWhenVisible = {display: blogVisible ? 'none' : ''}
@@ -40,6 +42,18 @@ const Blog = ({ blog, blogs, setBlogs }) => {
     setBlogs(updatedBlogs)
   }
 
+  const removeBlog = async () => {
+    if (window.confirm(`Remove ${blog.name} by ${blog.author}`)) {
+      try {
+      const result = await blogService.removeBlog({ id: blog.id })
+      const updatedBlogs = blogs.filter(item => item.id !== result.id)
+      setBlogs(updatedBlogs)
+      } catch (error) {
+        setMessage(error)
+      }
+    }
+  }
+
   /* 'added by unknown user' for few old database entries */ 
   return(
     <div style={blogStyle}>
@@ -58,6 +72,9 @@ const Blog = ({ blog, blogs, setBlogs }) => {
         </div>
         <div>
           { blog.user[0]?.name || 'added by unknown user' } 
+        </div>
+        <div>
+          { user.username === blog.user[0]?.username && <button onClick={ () => removeBlog() }>remove</button> }
         </div>
       </div>
     </div>

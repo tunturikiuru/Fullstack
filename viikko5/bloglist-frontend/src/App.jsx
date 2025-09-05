@@ -17,11 +17,12 @@ const App = () => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
     )  
-  }, [])
+  }, [blogs])
 
   useEffect(() => {
     const userLoggedIn = JSON.parse(window.localStorage.getItem('user'))
     setUser(userLoggedIn)
+    blogService.setToken(userLoggedIn.token)
   }, [])
 
   const handleLogin = async event => {
@@ -50,7 +51,7 @@ const App = () => {
     <>
       {message && <Message message={ message } setMessage={setMessage } />}
       {!user && <LoginForm username={username} setUsername={setUsername} password={password} setPassword={setPassword} handleLogin={handleLogin}/>}
-      {user  && <Blogs blogs={blogs} setBlogs={setBlogs} logout={logout} setMessage={setMessage}/>}
+      {user  && <Blogs blogs={blogs} setBlogs={setBlogs} logout={logout} setMessage={setMessage} user={user}/>}
     </>
   )
 }
