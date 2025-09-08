@@ -1,32 +1,8 @@
-import { useState } from 'react'
-import BlogForm from './NewBlogForm'
 import blogService from '../services/blogs'
+import Togglable from './Togglable'
 
 
-const Blogs = ({ blogs, setBlogs, logout, setMessage, user }) => {
-  const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
-
-  return (
-    <div>
-      <h2>blogs</h2>
-      <div>
-        {user.name} logged in
-        <button onClick={logout}>logout</button>
-      </div>
-      <BlogForm blogs={blogs} setBlogs={setBlogs} setMessage={setMessage}/>
-      <div>
-        {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} blogs={sortedBlogs} setBlogs={setBlogs} user={user} setMessage={setMessage}/>)}
-      </div>
-    </div>
-  )
-}
-
-
-const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
-  const [blogVisible, setBlogVisible] = useState(false)
-
-  const hideWhenVisible = { display: blogVisible ? 'none' : '' }
-  const showWhenVisible = { display: blogVisible ? '': 'none' }
+const Blog = ({ blog, blogs, setBlogs, user, setMessage, onLike }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -44,7 +20,8 @@ const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
   }
 
   const removeBlog = async () => {
-    if (window.confirm(`Remove ${blog.name} by ${blog.author}`)) {
+    console.log(blog)
+    if (window.confirm(`Remove ${blog.title} by ${blog.author}`)) {
       try {
         const result = await blogService.removeBlog({ id: blog.id })
         const updatedBlogs = blogs.filter(item => item.id !== result.id)
@@ -55,31 +32,37 @@ const Blog = ({ blog, blogs, setBlogs, user, setMessage }) => {
     }
   }
 
+  /* just for tests :( */
+  const handleLike = () => {
+    if (onLike) {
+      onLike()
+    } else {
+      addLike()
+    }
+  }
+
   /* 'added by unknown user' for few old database entries */
   return(
     <div style={blogStyle}>
-      <div style={hideWhenVisible}>
-        {blog.title} {blog.author} <button onClick={() => setBlogVisible(true)}>view</button>
-      </div>
-      <div style={showWhenVisible}>
-        <div>
-          {blog.title} {blog.author} <button onClick={() => setBlogVisible(false)}>hide</button>
-        </div>
-        <div>
-          {blog.url}
-        </div>
-        <div>
-          likes: {blog.likes} <button onClick={() => addLike()}>like</button>
-        </div>
-        <div>
-          { blog.user[0]?.name || 'added by unknown user' }
-        </div>
-        <div>
-          { user.username === blog.user[0]?.username && <button onClick={ () => removeBlog() }>remove</button> }
-        </div>
+      <div>
+        {blog.title} {blog.author}
+        <Togglable buttonLabel='view'>
+          <div>
+            {blog.url}
+          </div>
+          <div>
+            likes: {blog.likes} <button onClick={() => handleLike()}>like</button>
+          </div>
+          <div>
+            { blog.user[0]?.name || 'added by unknown user' }
+          </div>
+          <div>
+            { user.username === blog.user[0]?.username && <button onClick={ () => removeBlog() }>remove</button> }
+          </div>
+        </Togglable>
       </div>
     </div>
   )
 }
 
-export default Blogs
+export default Blog

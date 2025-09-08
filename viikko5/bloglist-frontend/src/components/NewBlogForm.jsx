@@ -1,26 +1,8 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
 
-const BlogForm = ({ blogs, setBlogs, setMessage }) => {
-  const [blogFormVisible, setBlogFormVisible] = useState(false)
 
-  const hideWhenVisible = { display: blogFormVisible ? 'none' : '' }
-  const showWhenVisible = { display: blogFormVisible ? '': 'none' }
-
-  return (
-    <>
-      <div style={hideWhenVisible}>
-        <button onClick={() => setBlogFormVisible(true)}>create new blog</button>
-      </div>
-      <div style={showWhenVisible}>
-        <NewBlogForm blogs={blogs} setBlogs={setBlogs} setMessage={setMessage}/>
-        <button onClick={() => setBlogFormVisible(false)}>cancel</button>
-      </div>
-    </>
-  )
-}
-
-const NewBlogForm = ({ blogs, setBlogs, setMessage }) => {
+const NewBlogForm = ({ blogs, setBlogs, setMessage, mockHandler }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -41,10 +23,21 @@ const NewBlogForm = ({ blogs, setBlogs, setMessage }) => {
     }
   }
 
+  /* just for tests */
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    if (mockHandler) {
+      mockHandler({ title, author, url })
+    } else {
+      console.log('handle submit')
+      createNewBlog(event)
+    }
+  }
+
   return (
     <>
       <h2>create new</h2>
-      <form onSubmit={createNewBlog}>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>
             title
@@ -69,4 +62,4 @@ const NewBlogForm = ({ blogs, setBlogs, setMessage }) => {
   )
 }
 
-export default BlogForm
+export default NewBlogForm
