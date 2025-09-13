@@ -43,7 +43,7 @@ const Blog = ({ blog, blogs, setBlogs, user, setMessage, onLike }) => {
 
   /* 'added by unknown user' for few old database entries */
   return(
-    <div style={blogStyle}>
+    <div style={blogStyle} className="blog">
       <div>
         {blog.title} {blog.author}
         <Togglable buttonLabel='view'>

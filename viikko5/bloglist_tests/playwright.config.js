@@ -33,7 +33,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  timeout: 3000,
+  timeout: 5000,
   fullyParallel: false,
   workers: 1,
 

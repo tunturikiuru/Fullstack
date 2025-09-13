@@ -80,7 +80,42 @@ describe('Blog app', () => {
         await page.getByRole('button', {name: 'view'}).click()
         await expect(page.getByRole('button', {name: 'remove'})).not.toBeVisible()
       })
+    })
 
+    test('5.23: blogs are shown in right order', async ({ page, request }) => {
+      await page.getByRole('button', {name: 'create new blog'}).click()
+      await createBlog(page, 'yksi', 'first', 'www..1')
+      await createBlog(page, 'two', 'toinen', 'www..2')
+      await createBlog(page, 'drei', 'tredje', 'www..3')
+
+      await expect(page.locator('.blog')).toHaveCount(3)
+      let blogs = await page.locator('.blog').allInnerTexts()
+
+      expect(blogs[0]).toContain('yksi first')
+      expect(blogs[1]).toContain('two toinen')
+      expect(blogs[2]).toContain('drei tredje')
+
+      let element = page.getByText('two toinen')
+      await element.getByRole('button', { name: 'view' }).click()
+      await element.getByRole('button', {name: 'like'}).click()
+      await page.waitForTimeout(500)
+      blogs = await page.locator('.blog').allInnerTexts()
+
+      expect(blogs[0]).toContain('two toinen')
+      expect(blogs[1]).toContain('yksi first')
+      expect(blogs[2]).toContain('drei tredje')
+
+      element = page.getByText('drei tredje')
+      await element.getByRole('button', { name: 'view' }).click()
+      await element.getByRole('button', {name: 'like'}).click()
+      await page.waitForTimeout(500)
+      await element.getByRole('button', {name: 'like'}).click()
+      await page.waitForTimeout(500)
+      blogs = await page.locator('.blog').allInnerTexts()
+
+      expect(blogs[0]).toContain('drei tredje')
+      expect(blogs[1]).toContain('two toinen')
+      expect(blogs[2]).toContain('yksi first')
     })
 
   })
