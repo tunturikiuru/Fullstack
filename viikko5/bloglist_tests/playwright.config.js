@@ -49,13 +49,11 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },
 
-    // HUOM!!! webkit ei mennyt läpi edes esimerkkitestissä
-    // ei toimi edes chatGPT:n avustuksella millään "helpolla" keinolla (enkä ala muuttamaan tietoturva-asetuksia ym)
 
-    //{
-    //  name: 'webkit',
-    //  use: { ...devices['Desktop Safari'] },
-    //},
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
 
     /* Test against mobile viewports. */
     // {
