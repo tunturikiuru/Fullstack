@@ -11,7 +11,6 @@ const NewBlogForm = ({ blogs, setBlogs, setMessage, mockHandler }) => {
     event.preventDefault()
     try {
       const newBlog = await blogService.createNew({ title, author, url })
-      console.log(newBlog)
       const blogList = blogs.concat(newBlog)
       setBlogs(blogList)
       setTitle('')

@@ -55,8 +55,8 @@ const blogs = [
 ]
 
 test('dummy returns one', () => {
-  const blogs = []
-  const result = listHelper.dummy(blogs)
+  const blogs1 = []
+  const result = listHelper.dummy(blogs1)
   assert.strictEqual(result, 1)
 })
 

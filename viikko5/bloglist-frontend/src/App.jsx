@@ -21,8 +21,10 @@ const App = () => {
 
   useEffect(() => {
     const userLoggedIn = JSON.parse(window.localStorage.getItem('user'))
-    setUser(userLoggedIn)
-    blogService.setToken(userLoggedIn.token)
+    if (userLoggedIn) {
+      setUser(userLoggedIn)
+      blogService.setToken(userLoggedIn.token)
+    }
   }, [])
 
   const handleLogin = async event => {

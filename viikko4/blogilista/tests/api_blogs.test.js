@@ -14,6 +14,7 @@ const blogs = helper.initialBlogs
 
 
 beforeEach(async () => {
+    await User.deleteMany({})
     await Blog.deleteMany({})
     await Blog.insertMany(helper.initialBlogs)
 })

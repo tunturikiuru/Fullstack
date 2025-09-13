@@ -5,14 +5,14 @@ const bcrypt = require('bcrypt')
 const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
+const Blog = require('../models/blog')
 const helper = require('./test_helper')
 
 const api = supertest(app)
 
-const initialUsers = helper.initialUsers
-
 beforeEach(async () => {
     await User.deleteMany({})
+    await Blog.deleteMany({})
     const passwordHash = await bcrypt.hash('secretpasssword', 10)
     const user = new User({username: 'Aku', name: 'Aku Ankka', passwordHash })
     await user.save()
