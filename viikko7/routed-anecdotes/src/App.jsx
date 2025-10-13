@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router-dom'
 
-const Menu = ({ anecdotes, addNew }) => {
+const Menu = ({ anecdotes, addNew}) => {
   const padding = {
     paddingRight: 5
   }
@@ -24,8 +24,29 @@ const Menu = ({ anecdotes, addNew }) => {
 }      
       
 const AnecdoteList = ({ anecdotes }) => {
+  const [notification, setNotification] = useState('')
+
+  const location = useLocation()
+  useEffect(() => {
+    if (location.state?.message) {
+      setNotification(location.state.message)
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
+
+  
+
+  useEffect(() => {
+    if (notification) {
+      setTimeout(() => {
+        setNotification('')
+      }, 5000)
+    }
+  }, [notification])
+
   return (
   <div>
+    {notification && <div>{notification}</div>}
     <h2>Anecdotes</h2>
     <ul>
       {anecdotes.map(anecdote => 
@@ -76,6 +97,8 @@ const CreateNew = (props) => {
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
 
+  const navigate = useNavigate()
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -85,6 +108,7 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    navigate('/', {state: {message: `new anecdote '${content}' created!`}})
   }
 
   return (
@@ -128,7 +152,7 @@ const App = () => {
     }
   ])
 
-  const [notification, setNotification] = useState('')
+  //const [notification, setNotification] = useState('')
 
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
@@ -152,21 +176,10 @@ const App = () => {
   return (
     <div>
       <h1>Software anecdotes</h1>
-      <Menu anecdotes={anecdotes} addNew={addNew} />
+      <Menu anecdotes={anecdotes} addNew={addNew}/>
       <Footer />
     </div>
   )
-
-/*  return (
-    <div>
-      <h1>Software anecdotes</h1>
-      <Menu anecdotes={anecdotes} addNew={addNew} />
-      <AnecdoteList anecdotes={anecdotes} />
-      <About />
-      <CreateNew addNew={addNew} />
-      <Footer />
-    </div>
-  )*/
 }
 
 export default App
