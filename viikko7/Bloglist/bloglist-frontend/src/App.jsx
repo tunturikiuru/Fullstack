@@ -7,15 +7,10 @@ import NotificationMessage from './components/NotificationMessage'
 import NotificationContext from './NotificationContext'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { notification, notificationDispatch } = useContext(NotificationContext)
-
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
-  }, [blogs])
 
   useEffect(() => {
     const userLoggedIn = JSON.parse(window.localStorage.getItem('user'))
@@ -64,8 +59,6 @@ const App = () => {
       )}
       {user && (
         <Blogs
-          blogs={blogs}
-          setBlogs={setBlogs}
           logout={logout}
           user={user}
         />
