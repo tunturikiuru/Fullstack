@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImlpbmVzIiwiaWQiOiI2OGFmNTE5NTg2MjJkYjY4YjgxMTIzYjUiLCJpYXQiOjE3NTY0MDM1MDV9.ND9wninrNuaFsgMP_b1bjXrV5KJ4x1IMDn5nPGx3kEs
+
+{
+    "title": "poistettava blogi3",
+    "author": "iines",
+    "url": "www...",
+    "likes": 100
+}
