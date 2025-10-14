@@ -5,7 +5,7 @@ import BlogForm from './BlogForm'
 import Blog from './Blog'
 import NotificationContext from '../NotificationContext'
 
-const Blogs = ({ logout, user }) => {
+const Blogs = ({ user, setUser }) => {
   const { notificationDispatch } = useContext(NotificationContext)
 
   const result = useQuery({
@@ -25,6 +25,13 @@ const Blogs = ({ logout, user }) => {
 
   const blogs = result.data
   const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
+
+  const logout = () => {
+    window.localStorage.clear()
+    setUser(null)
+    blogService.setToken(null)
+    notificationDispatch({ type: 'SUCCESS', payload: { type: 'success', text: 'logout succesfull' }  })
+  }
 
   return (
     <div>
