@@ -4,9 +4,11 @@ import blogService from '../services/blogs'
 import BlogForm from './BlogForm'
 import Blog from './Blog'
 import NotificationContext from '../NotificationContext'
+import UserContext from '../UserContext'
 
-const Blogs = ({ user, setUser }) => {
+const Blogs = () => {
   const { notificationDispatch } = useContext(NotificationContext)
+  const { user, userDispatch } = useContext(UserContext)
 
   const result = useQuery({
     queryKey: ['blogs'],
@@ -28,7 +30,7 @@ const Blogs = ({ user, setUser }) => {
 
   const logout = () => {
     window.localStorage.clear()
-    setUser(null)
+    userDispatch({ type: 'LOGOUT' })
     blogService.setToken(null)
     notificationDispatch({ type: 'SUCCESS', payload: { type: 'success', text: 'logout succesfull' }  })
   }

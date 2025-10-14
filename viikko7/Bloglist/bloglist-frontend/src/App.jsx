@@ -1,18 +1,19 @@
-import { useState, useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import Blogs from './components/Blogs'
 import blogService from './services/blogs'
 import LoginForm from './components/LoginForm'
 import NotificationMessage from './components/NotificationMessage'
 import NotificationContext from './NotificationContext'
+import UserContext from './UserContext'
 
 const App = () => {
-  const [user, setUser] = useState(null)
   const { notification } = useContext(NotificationContext)
+  const { user, userDispatch } = useContext(UserContext)
 
   useEffect(() => {
     const userLoggedIn = JSON.parse(window.localStorage.getItem('user'))
     if (userLoggedIn) {
-      setUser(userLoggedIn)
+      userDispatch({ type: 'LOGIN', payload: userLoggedIn })
       blogService.setToken(userLoggedIn.token)
     }
   }, [])
@@ -20,8 +21,8 @@ const App = () => {
   return (
     <>
       {notification && <NotificationMessage />}
-      {!user && (<LoginForm setUser={setUser} /> )}
-      {user && (<Blogs user={user} setUser={setUser}/> )}
+      {!user && (<LoginForm /> )}
+      {user && (<Blogs /> )}
     </>
   )
 }

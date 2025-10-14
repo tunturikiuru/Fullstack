@@ -2,11 +2,13 @@ import { useState, useContext } from 'react'
 import blogService from '../services/blogs'
 import loginService from '../services/login'
 import NotificationContext from '../NotificationContext'
+import UserContext from '../UserContext'
 
-const LoginForm = ({ setUser }) => {
+const LoginForm = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { notificationDispatch } = useContext(NotificationContext)
+  const { userDispatch } = useContext(UserContext)
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -15,7 +17,7 @@ const LoginForm = ({ setUser }) => {
         username,
         password,
       })
-      setUser(userLoggingIn)
+      userDispatch({ type: 'LOGIN', payload: userLoggingIn })
       blogService.setToken(userLoggingIn.token)
       window.localStorage.setItem('user', JSON.stringify(userLoggingIn))
       setUsername('')
