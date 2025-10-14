@@ -36,37 +36,11 @@ const Blogs = ({ logout, user }) => {
       <BlogForm />
       <div>
         {sortedBlogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            blogs={sortedBlogs}
-            user={user}
-          />
+          <Blog key={blog.id} blog={blog} user={user} />
         ))}
       </div>
     </div>
   )
 }
-
-/* <div>
-      <h2>blogs</h2>
-      <div>
-        {user.name} logged in
-        <button onClick={logout}>logout</button>
-      </div>
-      <BlogForm blogs={blogs} setBlogs={setBlogs} />
-      <div>
-        {sortedBlogs.map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            blogs={sortedBlogs}
-            setBlogs={setBlogs}
-            user={user}
-          />
-        ))}
-      </div>
-    </div>
-*/
 
 export default Blogs

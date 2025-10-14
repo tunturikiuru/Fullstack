@@ -1,10 +1,26 @@
 import { useContext } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
 import Togglable from './Togglable'
 import NotificationContext from '../NotificationContext'
 
-const Blog = ({ blog, blogs, setBlogs, user, onLike }) => {
+const Blog = ({ blog, user, onLike }) => {
   const { notificationDispatch } = useContext(NotificationContext)
+  const queryClient = useQueryClient()
+
+  const likeBlogMutation = useMutation({
+    mutationFn: blogService.updateLikes,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
+
+  const removeBlogMutation = useMutation({
+    mutationFn: blogService.removeBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    }
+  })
 
   const blogStyle = {
     paddingTop: 10,
@@ -15,8 +31,7 @@ const Blog = ({ blog, blogs, setBlogs, user, onLike }) => {
   }
 
   const addLike = async () => {
-    const addedBy = blog.user
-    const result = await blogService.updateLikes({
+    likeBlogMutation.mutate({
       id: blog.id,
       title: blog.title,
       author: blog.author,
@@ -24,21 +39,13 @@ const Blog = ({ blog, blogs, setBlogs, user, onLike }) => {
       likes: blog.likes + 1,
       user: blog.user[0]?.id,
     })
-    result.user = addedBy
-    const updatedBlogs = blogs.map((item) =>
-      item.id === blog.id ? result : item
-    )
-    setBlogs(updatedBlogs)
   }
 
   const removeBlog = async () => {
-    console.log(blog)
     if (window.confirm(`Remove ${blog.title} by ${blog.author}`)) {
       try {
-        const result = await blogService.removeBlog({ id: blog.id })
-        const updatedBlogs = blogs.filter((item) => item.id !== result.id)
-        setBlogs(updatedBlogs)
-        notificationDispatch({ type: 'SUCCESS', payload: { text: 'blog removed', type: 'success' } })
+        removeBlogMutation.mutate({ id: blog.id })
+        notificationDispatch({ type: 'SUCCESS', payload: { text: `blog '${blog.title}' removed`, type: 'success' } })
       } catch (error) {
         notificationDispatch({ type: 'ERROR', payload: { text: error, type: 'error' } })
       }
