@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import Blogs from './components/Blogs'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/LoginForm'
-import Message from './components/Message'
+import NotificationMessage from './components/NotificationMessage'
+import NotificationContext from './NotificationContext'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const { notification, notificationDispatch } = useContext(NotificationContext)
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
@@ -36,9 +37,9 @@ const App = () => {
       window.localStorage.setItem('user', JSON.stringify(userLoggingIn))
       setUsername('')
       setPassword('')
-      setMessage({ type: 'notification', text: 'login succesfull' })
+      notificationDispatch({ type: 'SUCCESS', payload: { text: 'login successful', type: 'success' } })
     } catch {
-      setMessage({ type: 'error', text: 'wrong credentials' })
+      notificationDispatch({ type: 'ERROR', payload: { type: 'error', text: 'wrong credentials' }  })
     }
   }
 
@@ -46,12 +47,12 @@ const App = () => {
     window.localStorage.clear()
     setUser(null)
     blogService.setToken(null)
-    setMessage({ type: 'notification', text: 'logout succesfull' })
+    notificationDispatch({ type: 'SUCCESS', payload: { type: 'success', text: 'logout succesfull' }  })
   }
 
   return (
     <>
-      {message && <Message message={message} setMessage={setMessage} />}
+      {notification && <NotificationMessage />}
       {!user && (
         <LoginForm
           username={username}
@@ -66,7 +67,6 @@ const App = () => {
           blogs={blogs}
           setBlogs={setBlogs}
           logout={logout}
-          setMessage={setMessage}
           user={user}
         />
       )}

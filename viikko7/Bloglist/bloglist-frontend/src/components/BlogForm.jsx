@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import NewBlogForm from './NewBlogForm'
 
-const BlogForm = ({ blogs, setBlogs, setMessage }) => {
+const BlogForm = ({ blogs, setBlogs }) => {
   const [blogFormVisible, setBlogFormVisible] = useState(false)
 
   const hideWhenVisible = { display: blogFormVisible ? 'none' : '' }
@@ -18,7 +18,6 @@ const BlogForm = ({ blogs, setBlogs, setMessage }) => {
         <NewBlogForm
           blogs={blogs}
           setBlogs={setBlogs}
-          setMessage={setMessage}
         />
         <button onClick={() => setBlogFormVisible(false)}>cancel</button>
       </div>

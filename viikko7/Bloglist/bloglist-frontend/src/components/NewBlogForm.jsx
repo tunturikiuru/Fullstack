@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import blogService from '../services/blogs'
+import NotificationContext from '../NotificationContext'
 
-const NewBlogForm = ({ blogs, setBlogs, setMessage, mockHandler }) => {
+
+const NewBlogForm = ({ blogs, setBlogs, mockHandler }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const { notificationDispatch } = useContext(NotificationContext)
 
   const createNewBlog = async (event) => {
     event.preventDefault()
@@ -15,12 +18,9 @@ const NewBlogForm = ({ blogs, setBlogs, setMessage, mockHandler }) => {
       setTitle('')
       setAuthor('')
       setUrl('')
-      setMessage({
-        type: 'notification',
-        text: `a new blog ${newBlog.title} by ${newBlog.author} added`,
-      })
+      notificationDispatch({ type: 'SUCCESS', payload: { text: `a new blog ${newBlog.title} by ${newBlog.author} added`, type: 'success' } })
     } catch {
-      setMessage({ type: 'error', text: 'virhe' })
+      notificationDispatch({ type: 'ERROR', payload: { text: 'error', type: 'error' } })
     }
   }
 

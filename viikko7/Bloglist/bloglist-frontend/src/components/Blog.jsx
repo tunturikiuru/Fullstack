@@ -1,7 +1,11 @@
+import { useContext } from 'react'
 import blogService from '../services/blogs'
 import Togglable from './Togglable'
+import NotificationContext from '../NotificationContext'
 
-const Blog = ({ blog, blogs, setBlogs, user, setMessage, onLike }) => {
+const Blog = ({ blog, blogs, setBlogs, user, onLike }) => {
+  const { notificationDispatch } = useContext(NotificationContext)
+
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -34,8 +38,9 @@ const Blog = ({ blog, blogs, setBlogs, user, setMessage, onLike }) => {
         const result = await blogService.removeBlog({ id: blog.id })
         const updatedBlogs = blogs.filter((item) => item.id !== result.id)
         setBlogs(updatedBlogs)
+        notificationDispatch({ type: 'SUCCESS', payload: { text: 'blog removed', type: 'success' } })
       } catch (error) {
-        setMessage(error)
+        notificationDispatch({ type: 'ERROR', payload: { text: error, type: 'error' } })
       }
     }
   }

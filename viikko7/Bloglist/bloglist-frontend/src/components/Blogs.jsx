@@ -1,7 +1,7 @@
 import BlogForm from './BlogForm'
 import Blog from './Blog'
 
-const Blogs = ({ blogs, setBlogs, logout, setMessage, user }) => {
+const Blogs = ({ blogs, setBlogs, logout, user }) => {
   const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes)
 
   return (
@@ -11,7 +11,7 @@ const Blogs = ({ blogs, setBlogs, logout, setMessage, user }) => {
         {user.name} logged in
         <button onClick={logout}>logout</button>
       </div>
-      <BlogForm blogs={blogs} setBlogs={setBlogs} setMessage={setMessage} />
+      <BlogForm blogs={blogs} setBlogs={setBlogs} />
       <div>
         {sortedBlogs.map((blog) => (
           <Blog
@@ -20,7 +20,6 @@ const Blogs = ({ blogs, setBlogs, logout, setMessage, user }) => {
             blogs={sortedBlogs}
             setBlogs={setBlogs}
             user={user}
-            setMessage={setMessage}
           />
         ))}
       </div>
