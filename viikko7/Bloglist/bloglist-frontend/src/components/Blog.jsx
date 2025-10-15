@@ -1,12 +1,16 @@
 import { useContext } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
-import Togglable from './Togglable'
 import NotificationContext from '../NotificationContext'
+import { useParams } from 'react-router-dom'
 
-const Blog = ({ blog, user, onLike }) => {
+const Blog = ({ blogs, onLike }) => {
   const { notificationDispatch } = useContext(NotificationContext)
   const queryClient = useQueryClient()
+
+  const id = useParams().id
+
+  const blog = blogs.find(b => b.id === id)
 
   const likeBlogMutation = useMutation({
     mutationFn: blogService.updateLikes,
@@ -22,14 +26,6 @@ const Blog = ({ blog, user, onLike }) => {
     }
   })
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-  }
-
   const addLike = async () => {
     likeBlogMutation.mutate({
       id: blog.id,
@@ -41,6 +37,7 @@ const Blog = ({ blog, user, onLike }) => {
     })
   }
 
+  // not needed anymore?
   const removeBlog = async () => {
     if (window.confirm(`Remove ${blog.title} by ${blog.author}`)) {
       try {
@@ -63,23 +60,14 @@ const Blog = ({ blog, user, onLike }) => {
 
   /* 'added by unknown user' for few old database entries */
   return (
-    <div style={blogStyle} className="blog">
+    <div>
+      <h2>{blog.title} {blog.author} </h2>
+      <a href={blog.url}>{blog.url}</a>
       <div>
-        {blog.title} {blog.author}
-        <Togglable buttonLabel="view">
-          <div>{blog.url}</div>
-          <div>
-            likes: {blog.likes}{' '}
-            <button onClick={() => handleLike()}>like</button>
-          </div>
-          <div>{blog.user[0]?.name || 'added by unknown user'}</div>
-          <div>
-            {user.username === blog.user[0]?.username && (
-              <button onClick={() => removeBlog()}>remove</button>
-            )}
-          </div>
-        </Togglable>
+        likes: {blog.likes}{' '}
+        <button onClick={() => handleLike()}>like</button>
       </div>
+      <div>{blog.user[0]?.name || 'added by unknown user'}</div>
     </div>
   )
 }

@@ -31,4 +31,15 @@ const removeBlog = async ({ id }) => {
   return result
 }
 
-export default { getAll, createNew, setToken, updateLikes, removeBlog }
+const allUsers = async () => {
+  const result = await axios.get('/api/users')
+  return result.data
+}
+
+const getUser = async (id) => {
+  const result = await allUsers()
+  const user = result.find(user => user.id===id)
+  return user
+}
+
+export default { getAll, createNew, setToken, updateLikes, removeBlog, allUsers, getUser }
